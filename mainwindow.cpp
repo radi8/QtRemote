@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     remotePort = 8475;
 
     socket = new QUdpSocket(this);
-//    socket->bind(QHostAddress::LocalHost,7200);
     socket->bind(QHostAddress(remoteIP),localPort);
 //    socket->bind(QHostAddress::AnyIPv4,7200);
     connect(socket,SIGNAL(readyRead()),this,SLOT(readyRead()));
@@ -50,15 +49,13 @@ void MainWindow::readyRead()
 
     QHostAddress sender;
     quint16 senderPort;
+    QString myMessage;
+
     socket->readDatagram(Buffer.data(),Buffer.size(),&sender,&senderPort);
+    myMessage = sender.toString() + QStringLiteral(" : %1").arg(senderPort);
 
-    ui->textBrowser->append( "Message from: " + sender.toString());
-    ui->textBrowser->append( QStringLiteral("Message port: %1").arg(senderPort));
+    ui->textBrowser->append( "Message from: " + myMessage);
     ui->textBrowser->append( "Message: " + Buffer);
-//    qDebug() << "Message from: " << sender.toString();
-//    qDebug() << "Message port: " << senderPort;
-//    qDebug() << "Message: " << Buffer;
-
 }
 
 void MainWindow::on_pushButton_Close_clicked()
