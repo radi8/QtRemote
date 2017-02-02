@@ -10,8 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
     setWindowTitle(tr("Remote controller"));
     statusLabel = new QLabel(this);
-    ui->statusBar->addPermanentWidget(statusLabel);
-    ui->statusBar->showMessage("Connecting to remote");
+    ui->statusBar->addWidget(statusLabel);
+    ui->statusBar->showMessage("Not connected to remote");
 
 // Connecting to remote
     remoteIP = "192.168.1.70";
@@ -23,6 +23,9 @@ MainWindow::MainWindow(QWidget *parent) :
 //    socket->bind(QHostAddress::AnyIPv4,7200);
     connect(socket,SIGNAL(readyRead()),this,SLOT(readyRead()));
 
+//  Test the connection
+    isAlive = true;
+    sendData("00");
 }
 
 MainWindow::~MainWindow()
@@ -32,13 +35,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::sendData(QString mySendString)
 {
-//    qint16 remotePort = 8475;
-
     QByteArray Data;
+
     Data.append(mySendString);
-    socket->writeDatagram(Data,QHostAddress("192.168.1.70"),remotePort);
-    //192.168.1.10
-    //192.168.1.255
+    socket->writeDatagram(Data,QHostAddress(remoteIP),remotePort);
 }
 
 
@@ -56,6 +56,12 @@ void MainWindow::readyRead()
 
     ui->textBrowser->append( "Message from: " + myMessage);
     ui->textBrowser->append( "Message: " + Buffer);
+//  bool isAlive is set true in constructor making first message received see it
+//  as true so we message on status to show a live connection and set false.
+    if(isAlive) {
+        ui->statusBar->showMessage("Connected to " + remoteIP + " : " +QString::number(remotePort));
+        isAlive = false;
+    }
 }
 
 void MainWindow::on_pushButton_Close_clicked()

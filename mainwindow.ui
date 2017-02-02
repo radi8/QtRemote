@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>448</width>
-    <height>443</height>
+    <width>450</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -118,13 +118,29 @@
      <string>Close</string>
     </property>
    </widget>
+   <widget class="sMeter" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>4</y>
+      <width>160</width>
+      <height>182</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>448</width>
+     <width>450</width>
      <height>19</height>
     </rect>
    </property>
@@ -144,6 +160,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>sMeter</class>
+   <extends>QFrame</extends>
+   <header>smeter.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

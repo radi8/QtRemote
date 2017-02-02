@@ -41,6 +41,7 @@ private:
     qint16 localPort;
     qint16 remotePort;
     QString remoteIP;
+    bool isAlive;
 };
 
 #endif // MAINWINDOW_H

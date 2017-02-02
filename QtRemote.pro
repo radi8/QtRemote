@@ -26,10 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    mysettings.cpp
+    mysettings.cpp \
+    Meter.cpp \
+    smeter.cpp
 
 HEADERS  += mainwindow.h \
-    mysettings.h
+    mysettings.h \
+    Meter.h \
+    smeter.h
 
 FORMS    += mainwindow.ui \
     mysettings.ui
