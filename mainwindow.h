@@ -21,8 +21,6 @@ public slots:
     void readyRead();
 
 private slots:
-    void on_pushButton_Tune_clicked();
-
     void on_pushButton_Clear_clicked();
 
     void on_pushButton_Close_clicked();
@@ -31,7 +29,13 @@ private slots:
 
     void on_actionSettings_triggered();
 
+    void on_pushButton_Tune_clicked();
+
     void on_pushButton_2_clicked();
+
+    void on_pBtn_Relay2_clicked();
+
+    void on_pBtn_Relay1_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -42,6 +46,9 @@ private:
     qint16 remotePort;
     QString remoteIP;
     bool isAlive;
+    void processBuffer();
+// Test data for processBuffer()
+    int buttonValue;
 };
 
 #endif // MAINWINDOW_H

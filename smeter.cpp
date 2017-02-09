@@ -1,8 +1,8 @@
 #include "smeter.h"
 
 sMeter::sMeter(QWidget* parent) : QFrame(parent) {
-    sMeterMain=new Meter("Battery");
-    sMeterSub=new Meter("vswr");
+    sMeterMain=new Meter("Volts");
+    sMeterSub=new Meter("Amperes");
     meter_dbm = 0; // 0 to 20 full range
     sub_meter_dbm = 0;
     subRx = true;
