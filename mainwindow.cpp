@@ -18,12 +18,21 @@ MainWindow::MainWindow(QWidget *parent) :
     localPort = 7200;
     remotePort = 8475;
 
-    socket = new QUdpSocket(this);
-    socket->bind(QHostAddress(remoteIP),localPort);
-    connect(socket,SIGNAL(readyRead()),this,SLOT(readyRead()));
+    tcpSocket = new QTcpSocket(this);
+
+    connect(tcpSocket, SIGNAL(connected()), this, SLOT(connected()));
+    connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+    connect(tcpSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
+    connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+
+    mySendString = "/gpio/0\r\n\r\n\r\n";
+    qDebug() << "connecting...";
+
+    sendData();
+
 
 //  Test the connection
-    sendData("09 Request full status report");
+//    sendData("09 Request full status report");
 
     buttonValue = 5; // debug data while testing remove in final (don't forget header declaration also)
     ui->frame->meter_dbm = 14.5; // debug data while testing
@@ -34,22 +43,54 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::sendData(QString mySendString)
+void MainWindow::sendData()
 {
-    QByteArray Data;
+    // this is not blocking call
+    tcpSocket->connectToHost(remoteIP, remotePort);
 
-    Data.append(mySendString);
-    socket->writeDatagram(Data,QHostAddress(remoteIP),remotePort);
+    // we need to wait...
+    if(!tcpSocket->waitForConnected(5000))
+    {
+        qDebug() << "Error: " << tcpSocket->errorString();
+    }
+//    QByteArray Data;
+
+//    Data.append(mySendString);
+//    tcpSocket->writeDatagram(Data,QHostAddress(remoteIP),remotePort);
 //    ui->statusBar->showMessage("Not connected to remote");
 //    ui->statusBar->clearMessage();
+
 }
 
 
 void MainWindow::readyRead()
 {
-//    QByteArray Buffer;
-    Buffer.resize(socket->pendingDatagramSize());
+    QByteArray Buffer;
+    int j = 0;
+    int k = 0;
+    int m = 0;
 
+    Buffer.resize(tcpSocket->readBufferSize());
+
+    qDebug() << "reading...";
+    // read the data from the socket
+    Buffer = tcpSocket->readAll();
+//    qDebug() << Buffer;
+
+    // Strip off all the html information from beginning and end of body
+    while ((j = Buffer.indexOf("\n", j)) != -1) {
+        m = k;
+        k = j;
+//        qDebug() << "Found LF tag at index position" << j << "and k = " << k << "and m = " << m;
+        ++j;
+    }
+    m++;
+    Buffer = Buffer.mid(m, k - m - 7);
+//    ui->textBrowser->append(QVariant(m).toString()); // debug information
+//    ui->textBrowser->append(QVariant(k).toString()); // debug information
+    ui->textBrowser->append(Buffer);
+//    qDebug() << "k = " << k << "and m = " << m;
+/*
     QHostAddress sender;
     quint16 senderPort;
     QString myMessage;
@@ -85,8 +126,36 @@ void MainWindow::readyRead()
       break;
     }
     processBuffer();
+    */
 }
 
+void MainWindow::connected()
+{
+    qDebug() << "connected...";
+    qDebug() << mySendString;
+    // Hey server, switch the gpio
+    tcpSocket->write(mySendString);
+}
+
+void MainWindow::disconnected()
+{
+    qDebug() << "disconnected...";
+}
+
+void MainWindow::bytesWritten(qint64 bytes)
+{
+    qDebug() << bytes << " bytes written...";
+}
+
+/*
+void MainWindow::sendRequest()
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QTe);
+    out.setVersion(QDataStream::Qt_5_1);
+}
+*/
 void MainWindow::processBuffer()
 {
     long cmd;
@@ -172,11 +241,15 @@ void MainWindow::on_pushButton_Pwr_clicked()
 {   
     if (ui->pushButton_Pwr->isChecked()) {
         ui->pushButton_Pwr->setStyleSheet("background-color: rgb(255, 155, 155)"); //Light Red
-        sendData("01 Power 0n");
+//        sendData("01 Power 0n");
+        mySendString = "/gpio/0\r\n\r\n\r\n";
+        sendData();
         buttonValue = 1; // debug remove on final version
     } else {
         ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
-        sendData("02 Power 0ff");
+//        sendData("02 Power 0ff");
+        mySendString = "/gpio/1\r\n\r\n\r\n";
+        sendData();
         buttonValue = 2; // debug remove on final version
     }
 }
@@ -197,7 +270,7 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::on_pushButton_Tune_clicked()
 {
     ui->textBrowser->append("Tune button clicked");
-    sendData("03 Start autotune");
+//    sendData("03 Start autotune");
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -211,11 +284,11 @@ void MainWindow::on_pBtn_Relay1_clicked()
 
     if (ui->pBtn_Relay1->isChecked()) {
         ui->textBrowser->append("Relay1 On clicked");
-        sendData("05 Operate Relay1");
+//        sendData("05 Operate Relay1");
     }
     else {
         ui->textBrowser->append("Relay1 Off clicked");
-        sendData("06 Release Relay1");
+//        sendData("06 Release Relay1");
     }
 }
 
@@ -225,11 +298,11 @@ void MainWindow::on_pBtn_Relay2_clicked()
 
     if (ui->pBtn_Relay2->isChecked()) {
         ui->textBrowser->append("Relay2 On clicked");
-        sendData("07 Operate Relay2");
+//        sendData("07 Operate Relay2");
     }
     else {
         ui->textBrowser->append("Relay2 Off clicked");
-        sendData("08 Release Relay1");
+//        sendData("08 Release Relay1");
     }
 }
 
