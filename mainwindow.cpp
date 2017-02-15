@@ -80,7 +80,7 @@ void MainWindow::readyRead()
         _antenna,
         _message,
     }; */
-    QByteArray Buffer;
+//    QByteArray Buffer;
     QString myMessage;
     long cmdNumber = 0;
     char * pEnd;
@@ -98,6 +98,8 @@ void MainWindow::readyRead()
     } else {
         cmdNumber = _message;
     }
+
+    processBuffer();
 
     switch (cmdNumber) {
     case _volts:
@@ -175,12 +177,13 @@ void MainWindow::processBuffer()
     double cmdVal;
 
     cmd = strtol(Buffer, &pEnd, 10);
-    cmdValue = strtol (pEnd,&pEnd,10);
-    cmdVal = cmdValue / 1000.0;
-qDebug() << "command received = " << cmd << " and command value = " << cmdVal;
+    cmdValue = strtol (pEnd, &pEnd,10);
+//    cmdVal = cmdValue / 1000.0;
+qDebug() << "Value of Buffer = " << Buffer;
+qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
 
     switch (cmd) {
-    case 1:
+/*    case 1:
         ui->frame->meter_dbm = cmdVal;
         ui->frame->sub_meter_dbm = cmdVal;
         ui->frame->update();
@@ -189,8 +192,8 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdVal;
         ui->frame->meter_dbm = cmdVal;
         ui->frame->sub_meter_dbm = cmdVal;
         ui->frame->update();
-        break;
-    case 3:
+        break; */
+    case 1:
         // Power switch status. (0 = power off, 1 = Power on)
         if (cmdValue) {
             ui->textBrowser->append("Power on");

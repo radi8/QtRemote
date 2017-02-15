@@ -19,6 +19,7 @@ public:
     ~MainWindow();
 
     QByteArray mySendString;
+    QByteArray Buffer;
     enum {
         _volts = 1, //Start the emun from 1
         _amps,
@@ -69,7 +70,6 @@ private:
     Ui::MainWindow *ui;
     QTcpSocket *tcpSocket;
     QLabel *statusLabel;
-    QByteArray Buffer;
     qint16 localPort;
     qint16 remotePort;
     QString remoteIP;
