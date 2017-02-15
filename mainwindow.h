@@ -19,7 +19,35 @@ public:
     ~MainWindow();
 
     QByteArray mySendString;
-
+    enum {
+        _volts = 1, //Start the emun from 1
+        _amps,
+        _analog2,
+        _tuneState,
+        _pwrSwitch,
+        _rly1,
+        _rly2,
+        _antenna,
+        _message
+    };
+    enum {
+        CMD_PWR_ON = 1,
+        CMD_PWR_OFF,
+        CMD_TUNE,
+        CMD_READ_A0,
+        CMD_READ_A1,
+        CMD_READ_A2,
+        CMD_READ_D2,
+        CMD_READ_D3,
+        CMD_SET_RLY1_ON,
+        CMD_SET_RLY1_OFF,
+        CMD_SET_RLY2_ON,
+        CMD_SET_RLY2_OFF,
+        CMD_SET_LED_HI,
+        CMD_SET_LED_LO,
+        CMD_STATUS,
+        CMD_ID
+    };
 public slots:
 
 private slots:
@@ -49,7 +77,7 @@ private:
     void processBuffer();
     void sendData();
 // Test data for processBuffer()
-    int buttonValue;
+//    int buttonValue;
 };
 
 #endif // MAINWINDOW_H

@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tcpSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-    mySendString = "/gpio/0\r\n\r\n\r\n";
+    mySendString = "/gpio/1\r";
     qDebug() << "connecting...";
 
     sendData();
@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //  Test the connection
 //    sendData("09 Request full status report");
 
-    buttonValue = 5; // debug data while testing remove in final (don't forget header declaration also)
+//    buttonValue = 5; // debug data while testing remove in final (don't forget header declaration also)
     ui->frame->meter_dbm = 14.5; // debug data while testing
 }
 
@@ -62,71 +62,82 @@ void MainWindow::sendData()
 
 }
 
-
+// When data arrives from the remote end, this routine strips off the html
+// headers and places the resulting string into "myMessage". The message
+// will take the form of: cmdNum cmdVal The cmdval may be another number
+// or an information string. The numbers and values are extracted and converted
+// to long integers or a string if cmdVal is a message.
 void MainWindow::readyRead()
 {
+/*  enum {  Displayed here for easy reference
+        _volts,
+        _amps,
+        _analog2,
+        _tuneState,
+        _pwrSwitch,
+        _rly1,
+        _rly2,
+        _antenna,
+        _message,
+    }; */
     QByteArray Buffer;
-    int j = 0;
-    int k = 0;
-    int m = 0;
+    QString myMessage;
+    long cmdNumber = 0;
+    char * pEnd;
 
     Buffer.resize(tcpSocket->readBufferSize());
 
     qDebug() << "reading...";
     // read the data from the socket
     Buffer = tcpSocket->readAll();
-//    qDebug() << Buffer;
+    qDebug() << Buffer;
+    myMessage = Buffer;
 
-    // Strip off all the html information from beginning and end of body
-    while ((j = Buffer.indexOf("\n", j)) != -1) {
-        m = k;
-        k = j;
-//        qDebug() << "Found LF tag at index position" << j << "and k = " << k << "and m = " << m;
-        ++j;
+    if(myMessage.left(4) != "GPIO") {
+        cmdNumber = strtol(Buffer, &pEnd, 10);
+    } else {
+        cmdNumber = _message;
     }
-    m++;
-    Buffer = Buffer.mid(m, k - m - 7);
-//    ui->textBrowser->append(QVariant(m).toString()); // debug information
-//    ui->textBrowser->append(QVariant(k).toString()); // debug information
-    ui->textBrowser->append(Buffer);
-//    qDebug() << "k = " << k << "and m = " << m;
-/*
-    QHostAddress sender;
-    quint16 senderPort;
-    QString myMessage;
 
-    socket->readDatagram(Buffer.data(),Buffer.size(),&sender,&senderPort);
-    myMessage = sender.toString() + QStringLiteral(" : %1").arg(senderPort);
+    switch (cmdNumber) {
+    case _volts:
+//        Buffer = "03 1"; //debug data for power switch state, remove in final version
+//        buttonValue = 0; // Power on
+        break;
+    case _amps:
+//        Buffer = "03 0"; //debug data for power switch state, remove in final version
+//        buttonValue = 0; // Power off
+        break;
+    case _analog2:
 
-    ui->textBrowser->append( "Message from: " + myMessage);
-    ui->textBrowser->append( "Message: " + Buffer);
-//  Let the user know that the connection is alive.
-    ui->statusBar->showMessage("Connected to " + remoteIP + " : " +QString::number(remotePort));
+        break;
+    case _tuneState:
 
-    switch (buttonValue) {
-    case 1:
-        Buffer = "03 1"; //debug data for power switch state, remove in final version
-        buttonValue = 0; // Power on
         break;
-    case 2:
-        Buffer = "03 0"; //debug data for power switch state, remove in final version
-        buttonValue = 0; // Power off
+    case _pwrSwitch:
+
         break;
-    case 3:
-        Buffer = "01 12600"; //debug data for meter value, remove in final version
-        buttonValue = 0;
+    case _rly1:
+
         break;
-    case 4:
-        Buffer = "02 0"; //debug data for meter value, remove in final version
-        buttonValue = 0;
+    case _rly2:
+
+        break;
+    case _antenna:
+
+        break;
+//    case rly1:
+
+//        break;
+    case _message:
+        ui->textBrowser->append( "Message: " + myMessage);
         break;
     default:
         // if nothing else matches, do the default
         // default is optional
       break;
     }
-    processBuffer();
-    */
+//    processBuffer();
 }
 
 void MainWindow::connected()
@@ -237,23 +248,6 @@ void MainWindow::on_pushButton_Close_clicked()
     close();
 }
 
-void MainWindow::on_pushButton_Pwr_clicked()
-{   
-    if (ui->pushButton_Pwr->isChecked()) {
-        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(255, 155, 155)"); //Light Red
-//        sendData("01 Power 0n");
-        mySendString = "/gpio/0\r\n\r\n\r\n";
-        sendData();
-        buttonValue = 1; // debug remove on final version
-    } else {
-        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
-//        sendData("02 Power 0ff");
-        mySendString = "/gpio/1\r\n\r\n\r\n";
-        sendData();
-        buttonValue = 2; // debug remove on final version
-    }
-}
-
 void MainWindow::on_pushButton_Clear_clicked()
 {
     ui->textBrowser->clear();
@@ -266,11 +260,46 @@ void MainWindow::on_actionSettings_triggered()
     mSettings.setModal(true);
     mSettings.exec();
 }
+/*
+    enum { // enum placed here for easy reference
+        CMD_PWR_ON = 1, //Start the enum from 1
+        CMD_PWR_OFF,
+        CMD_TUNE,
+        CMD_READ_A0,
+        CMD_READ_A1,
+        CMD_READ_A2,
+        CMD_READ_D2,
+        CMD_READ_D3,
+        CMD_SET_RLY1_ON,
+        CMD_SET_RLY1_OFF,
+        CMD_SET_RLY2_ON,
+        CMD_SET_RLY2_OFF,
+        CMD_SET_LED_HI,
+        CMD_SET_LED_LO,
+        CMD_STATUS,
+        CMD_ID
+    }; */
+void MainWindow::on_pushButton_Pwr_clicked()
+{
+
+    if (ui->pushButton_Pwr->isChecked()) {
+        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(255, 155, 155)"); //Light Red
+        mySendString = (QByteArray::number(CMD_PWR_ON, 10) + "\r");
+        sendData();
+    } else {
+        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
+        mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r");
+        sendData();
+    }
+    qDebug() << "mySendString from pwr button = " << mySendString;
+}
 
 void MainWindow::on_pushButton_Tune_clicked()
 {
-    ui->textBrowser->append("Tune button clicked");
-//    sendData("03 Start autotune");
+    ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
+    mySendString = (QByteArray::number(CMD_TUNE, 10) + "\r");
+    sendData();
+    qDebug() << "mySendString from Tune button = " << mySendString;
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -280,29 +309,23 @@ void MainWindow::on_pushButton_2_clicked()
 
 void MainWindow::on_pBtn_Relay1_clicked()
 {
-    buttonValue = 3;  // debug data
-
     if (ui->pBtn_Relay1->isChecked()) {
-        ui->textBrowser->append("Relay1 On clicked");
-//        sendData("05 Operate Relay1");
+        mySendString = (QByteArray::number(CMD_SET_RLY1_ON, 10) + "\r");
+    } else {
+        mySendString = (QByteArray::number(CMD_SET_RLY1_OFF, 10) + "\r");
     }
-    else {
-        ui->textBrowser->append("Relay1 Off clicked");
-//        sendData("06 Release Relay1");
-    }
+    sendData();
+    qDebug() << "mySendString from Relay1 button = " << mySendString;
 }
 
 void MainWindow::on_pBtn_Relay2_clicked()
 {
-    buttonValue = 4;  // debug data
-
     if (ui->pBtn_Relay2->isChecked()) {
-        ui->textBrowser->append("Relay2 On clicked");
-//        sendData("07 Operate Relay2");
+        mySendString = (QByteArray::number(CMD_SET_RLY2_ON, 10) + "\r");
+    } else {
+        mySendString = (QByteArray::number(CMD_SET_RLY2_OFF, 10) + "\r");
     }
-    else {
-        ui->textBrowser->append("Relay2 Off clicked");
-//        sendData("08 Release Relay1");
-    }
+    sendData();
+    qDebug() << "mySendString from Relay2 button = " << mySendString;
 }
 
