@@ -20,18 +20,20 @@ public:
 
     QByteArray mySendString;
     QByteArray Buffer;
-    enum {
-        _volts = 1, //Start the emun from 1
+    enum { // Receive these commands/responses from ESP01
+        _pwrSwitch = 1, //Start the emun from 1
+        _tuneState,
+        _volts,
         _amps,
         _analog2,
-        _tuneState,
-        _pwrSwitch,
+        _digital2,
+        _digital3,
         _rly1,
         _rly2,
         _antenna,
         _message
     };
-    enum {
+    enum { // Send these commands to ESP01
         CMD_PWR_ON = 1,
         CMD_PWR_OFF,
         CMD_TUNE,
@@ -73,11 +75,7 @@ private:
     qint16 localPort;
     qint16 remotePort;
     QString remoteIP;
-    bool isAlive;
-    void processBuffer();
     void sendData();
-// Test data for processBuffer()
-//    int buttonValue;
 };
 
 #endif // MAINWINDOW_H

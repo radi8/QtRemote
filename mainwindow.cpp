@@ -25,17 +25,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tcpSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-    mySendString = "/gpio/1\r";
+    mySendString = (QByteArray::number(CMD_STATUS, 10) + "\r");
+    sendData();
     qDebug() << "connecting...";
 
-    sendData();
-
-
-//  Test the connection
-//    sendData("09 Request full status report");
-
-//    buttonValue = 5; // debug data while testing remove in final (don't forget header declaration also)
-    ui->frame->meter_dbm = 14.5; // debug data while testing
+//    ui->frame->meter_dbm = 14.5; // debug data while testing
 }
 
 MainWindow::~MainWindow()
@@ -44,6 +38,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::sendData()
+// Sends the text contained in QByteArray mySendString
 {
     // this is not blocking call
     tcpSocket->connectToHost(remoteIP, remotePort);
@@ -53,147 +48,49 @@ void MainWindow::sendData()
     {
         qDebug() << "Error: " << tcpSocket->errorString();
     }
-//    QByteArray Data;
-
-//    Data.append(mySendString);
-//    tcpSocket->writeDatagram(Data,QHostAddress(remoteIP),remotePort);
-//    ui->statusBar->showMessage("Not connected to remote");
-//    ui->statusBar->clearMessage();
-
 }
 
-// When data arrives from the remote end, this routine strips off the html
-// headers and places the resulting string into "myMessage". The message
-// will take the form of: cmdNum cmdVal The cmdval may be another number
-// or an information string. The numbers and values are extracted and converted
-// to long integers or a string if cmdVal is a message.
 void MainWindow::readyRead()
+// When data arrives from the remote end, this routine places the sent string
+// into "myMessage". The message will take the form of: cmdNum cmdVal The cmdval
+// may be another number or an information string. The numbers and values are
+// extracted and converted to long integers or a string if cmdVal is a message.
 {
-/*  enum {  Displayed here for easy reference
+/*
+    enum { // Receive these commands/responses from ESP01
+        _pwrSwitch = 1, //Start the emun from 1
+        _tuneState,
         _volts,
         _amps,
         _analog2,
-        _tuneState,
-        _pwrSwitch,
+        _digital2,
+        _digital3,
         _rly1,
         _rly2,
         _antenna,
-        _message,
-    }; */
-//    QByteArray Buffer;
-    QString myMessage;
-    long cmdNumber = 0;
-    char * pEnd;
-
-    Buffer.resize(tcpSocket->readBufferSize());
-
-    qDebug() << "reading...";
-    // read the data from the socket
-    Buffer = tcpSocket->readAll();
-    qDebug() << Buffer;
-    myMessage = Buffer;
-
-    if(myMessage.left(4) != "GPIO") {
-        cmdNumber = strtol(Buffer, &pEnd, 10);
-    } else {
-        cmdNumber = _message;
-    }
-
-    processBuffer();
-
-    switch (cmdNumber) {
-    case _volts:
-//        Buffer = "03 1"; //debug data for power switch state, remove in final version
-//        buttonValue = 0; // Power on
-        break;
-    case _amps:
-//        Buffer = "03 0"; //debug data for power switch state, remove in final version
-//        buttonValue = 0; // Power off
-        break;
-    case _analog2:
-
-        break;
-    case _tuneState:
-
-        break;
-    case _pwrSwitch:
-
-        break;
-    case _rly1:
-
-        break;
-    case _rly2:
-
-        break;
-    case _antenna:
-
-        break;
-//    case rly1:
-
-//        break;
-    case _message:
-        ui->textBrowser->append( "Message: " + myMessage);
-        break;
-    default:
-        // if nothing else matches, do the default
-        // default is optional
-      break;
-    }
-//    processBuffer();
-}
-
-void MainWindow::connected()
-{
-    qDebug() << "connected...";
-    qDebug() << mySendString;
-    // Hey server, switch the gpio
-    tcpSocket->write(mySendString);
-}
-
-void MainWindow::disconnected()
-{
-    qDebug() << "disconnected...";
-}
-
-void MainWindow::bytesWritten(qint64 bytes)
-{
-    qDebug() << bytes << " bytes written...";
-}
-
-/*
-void MainWindow::sendRequest()
-{
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QTe);
-    out.setVersion(QDataStream::Qt_5_1);
-}
+        _message
+    };
 */
-void MainWindow::processBuffer()
-{
+
     long cmd;
     long cmdValue;
     char * pEnd;
     double cmdVal;
 
+    Buffer.resize(tcpSocket->readBufferSize());
+
+    qDebug() << "reading...";
+    // read the data from the socket into Buffer
+    Buffer = tcpSocket->readAll();
+
     cmd = strtol(Buffer, &pEnd, 10);
     cmdValue = strtol (pEnd, &pEnd,10);
-//    cmdVal = cmdValue / 1000.0;
+
 qDebug() << "Value of Buffer = " << Buffer;
 qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
 
     switch (cmd) {
-/*    case 1:
-        ui->frame->meter_dbm = cmdVal;
-        ui->frame->sub_meter_dbm = cmdVal;
-        ui->frame->update();
-        break;
-    case 2:
-        ui->frame->meter_dbm = cmdVal;
-        ui->frame->sub_meter_dbm = cmdVal;
-        ui->frame->update();
-        break; */
-    case 1:
+    case _pwrSwitch:
         // Power switch status. (0 = power off, 1 = Power on)
         if (cmdValue) {
             ui->textBrowser->append("Power on");
@@ -201,7 +98,31 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
             ui->textBrowser->append("Power off");
         }
         break;
-    case 4:
+    case _tuneState:
+        // Tuning completed notification
+        break;
+    case _volts:
+        cmdVal = cmdValue / 1000.0;
+        ui->frame->meter_dbm = cmdVal;
+        ui->frame->sub_meter_dbm = cmdVal;
+        ui->frame->update();
+        break;
+    case _amps:
+        cmdVal = cmdValue / 1000.0;
+        ui->frame->meter_dbm = cmdVal;
+        ui->frame->sub_meter_dbm = cmdVal;
+        ui->frame->update();
+        break;
+    case _analog2:
+
+        break;
+    case _digital2:
+
+        break;
+    case _digital3:
+
+        break;
+    case _rly1:
         // Relay 1 status (0 = released, 1 = operated)
         if (cmdValue) {
             ui->textBrowser->append("Relay 1 is operated");
@@ -209,7 +130,7 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
             ui->textBrowser->append("Relay 1 is released");
         }
         break;
-    case 5:
+    case _rly2:
         // Relay 2 status (0 = released, 1 = operated)
         if (cmdValue) {
             ui->textBrowser->append("Relay 2 is operated");
@@ -217,10 +138,7 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
             ui->textBrowser->append("Relay 2 is released");
         }
         break;
-    case 6:
-        // Tuning completed notification
-        break;
-    case 7:
+    case _antenna:
         // Selected antenna status
         switch (cmdValue) {
         case 0:
@@ -239,11 +157,33 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
             break;
         }
         break;
+    case _message:
+        // Tuning completed notification
+        break;
     default:
         // if nothing else matches, do the default
-        // default is optional
+        qDebug() << "@processBuffer: Doing the default case";
+        ui->textBrowser->append(Buffer);
       break;
     }
+}
+
+void MainWindow::connected()
+{
+    qDebug() << "connected...";
+    qDebug() << mySendString;
+    // Hey server, switch the gpio
+    tcpSocket->write(mySendString);
+}
+
+void MainWindow::disconnected()
+{
+    qDebug() << "disconnected...";
+}
+
+void MainWindow::bytesWritten(qint64 bytes)
+{
+    qDebug() << bytes << " bytes written...";
 }
 
 void MainWindow::on_pushButton_Close_clicked()
