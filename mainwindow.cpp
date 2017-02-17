@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tcpSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-    mySendString = (QByteArray::number(CMD_STATUS, 10) + "\r");
+    mySendString = (QByteArray::number(CMD_READ_A1, 10) + "\r");
     sendData();
     qDebug() << "connecting...";
 
@@ -86,7 +86,7 @@ void MainWindow::readyRead()
     cmd = strtol(Buffer, &pEnd, 10);
     cmdValue = strtol (pEnd, &pEnd,10);
 
-qDebug() << "Value of Buffer = " << Buffer;
+qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
 qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
 
     switch (cmd) {
@@ -102,13 +102,13 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
         // Tuning completed notification
         break;
     case _volts:
-        cmdVal = cmdValue / 1000.0;
+        cmdVal = cmdValue / 204.6;
         ui->frame->meter_dbm = cmdVal;
         ui->frame->sub_meter_dbm = cmdVal;
         ui->frame->update();
         break;
     case _amps:
-        cmdVal = cmdValue / 1000.0;
+        cmdVal = cmdValue / 204.6;
         ui->frame->meter_dbm = cmdVal;
         ui->frame->sub_meter_dbm = cmdVal;
         ui->frame->update();
