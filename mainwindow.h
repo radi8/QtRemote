@@ -20,19 +20,7 @@ public:
 
     QByteArray mySendString;
     QByteArray Buffer;
-    enum { // Receive these commands/responses from ESP01
-        _pwrSwitch = 1, //Start the emun from 1
-        _tuneState,
-        _volts,
-        _amps,
-        _analog2,
-        _digital2,
-        _digital3,
-        _rly1,
-        _rly2,
-        _antenna,
-        _message
-    };
+
     enum { // Send these commands to ESP01
         CMD_PWR_ON = 1,
         CMD_PWR_OFF,
@@ -49,7 +37,21 @@ public:
         CMD_SET_LED_HI,
         CMD_SET_LED_LO,
         CMD_STATUS,
-        CMD_ID
+        CMD_ID // Always keep this last
+    };
+
+    enum { // Receive these commands/responses from ESP01
+        _pwrSwitch = CMD_ID + 1,
+        _tuneState,
+        _volts,
+        _amps,
+        _analog2,
+        _digital2,
+        _digital3,
+        _rly1,
+        _rly2,
+        _antenna,
+        _message
     };
 public slots:
 
