@@ -19,19 +19,18 @@ MainWindow::MainWindow(QWidget *parent) :
     remotePort = 8475;
 
     tcpSocket = new QTcpSocket(this);
+    QTimer *timer = new QTimer(this);
 
     connect(tcpSocket, SIGNAL(connected()), this, SLOT(connected()));
     connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
     connect(tcpSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(getData()));
 
-    mySendString = (QByteArray::number(CMD_ID, 10) + "\r");
+    timer->start(1000);
+    mySendString = (QByteArray::number(CMD_ID, 10) + "\r"); // Get the slave address
     sendData();
     qDebug() << "connecting...";
-
-    QTimer *timer = new QTimer(this);
-        connect(timer, SIGNAL(timeout()), this, SLOT(getData()));
-        timer->start(1000);
 }
 
 MainWindow::~MainWindow()
@@ -130,13 +129,13 @@ void MainWindow::readyRead()
         ui->frame->update();
         break;
     case _analog2:
-
+//        ui->textBrowser->append("Analog2 data returned");
         break;
     case _digital2:
-
+//        ui->textBrowser->append("Digital 2 data returned");
         break;
     case _digital3:
-
+//        ui->textBrowser->append("Digital 3 data returned");
         break;
     case _rly1:
         // Relay 1 status (0 = released, 1 = operated)
@@ -187,20 +186,21 @@ void MainWindow::readyRead()
 
 void MainWindow::connected()
 {
-//    qDebug() << "connected...";
+    qDebug() << "connected...";
 //    qDebug() << mySendString;
     // Hey server, who are you?
     tcpSocket->write(mySendString);
+    tcpSocket->flush();
 }
 
 void MainWindow::disconnected()
 {
-//    qDebug() << "disconnected...";
+    qDebug() << "disconnected by host...";
 }
 
 void MainWindow::bytesWritten(qint64 bytes)
 {
-//    qDebug() << bytes << " bytes written...";
+    qDebug() << bytes << " bytes written...";
 }
 
 void MainWindow::on_pushButton_Close_clicked()

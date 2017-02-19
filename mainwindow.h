@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-//#include <QUdpSocket>
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QLabel>
