@@ -60,6 +60,7 @@ private slots:
     void disconnected();
     void bytesWritten(qint64 bytes);
     void readyRead();
+    void getData();
 
     void on_pushButton_Clear_clicked();
     void on_pushButton_Close_clicked();
@@ -77,6 +78,7 @@ private:
     qint16 localPort;
     qint16 remotePort;
     QString remoteIP;
+    QString myMessage;
     void sendData();
 };
 

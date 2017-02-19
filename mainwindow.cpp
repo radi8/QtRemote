@@ -25,11 +25,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tcpSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-    mySendString = (QByteArray::number(CMD_READ_A1, 10) + "\r");
+    mySendString = (QByteArray::number(CMD_ID, 10) + "\r");
     sendData();
     qDebug() << "connecting...";
 
-//    ui->frame->meter_dbm = 14.5; // debug data while testing
+    QTimer *timer = new QTimer(this);
+        connect(timer, SIGNAL(timeout()), this, SLOT(getData()));
+        timer->start(1000);
 }
 
 MainWindow::~MainWindow()
@@ -41,6 +43,9 @@ void MainWindow::sendData()
 // Sends the text contained in QByteArray mySendString
 {
     // this is not blocking call
+    while(tcpSocket->state() ==  QAbstractSocket::ConnectedState) {
+        // Kill time until previous command is sent
+    }
     tcpSocket->connectToHost(remoteIP, remotePort);
 
     // we need to wait...
@@ -48,6 +53,14 @@ void MainWindow::sendData()
     {
         qDebug() << "Error: " << tcpSocket->errorString();
     }
+}
+
+void MainWindow::getData()
+{
+    mySendString = (QByteArray::number(CMD_STATUS, 10) + "\r");
+    sendData();
+//    mySendString = (QByteArray::number(CMD_READ_A1, 10) + "\r");
+//    sendData();
 }
 
 void MainWindow::readyRead()
@@ -77,18 +90,23 @@ void MainWindow::readyRead()
     char * pEnd;
     double cmdVal;
 
+    Buffer.clear();
     Buffer.resize(tcpSocket->readBufferSize());
 
-    qDebug() << "reading...";
+//qDebug() << "reading...";
     // read the data from the socket into Buffer
     Buffer = tcpSocket->readAll();
-
+//qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
     cmd = strtol(Buffer, &pEnd, 10);
-    cmdValue = strtol (pEnd, &pEnd,10);
+    if(cmd != _message) {
+        cmdValue = strtol (pEnd, &pEnd,10);
+    } else {
+        myMessage = pEnd;
+        qDebug() << "At else statement: myMessage = " << myMessage;
+    }
 
-qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
-qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
-
+//qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
+//qDebug() << "Value of Buffer after cmd extracted = " << Buffer;
     switch (cmd) {
     case _pwrSwitch:
         // Power switch status. (0 = power off, 1 = Power on)
@@ -104,12 +122,10 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
     case _volts:
         cmdVal = cmdValue / 204.6;
         ui->frame->meter_dbm = cmdVal;
-        ui->frame->sub_meter_dbm = cmdVal;
         ui->frame->update();
         break;
     case _amps:
         cmdVal = cmdValue / 204.6;
-        ui->frame->meter_dbm = cmdVal;
         ui->frame->sub_meter_dbm = cmdVal;
         ui->frame->update();
         break;
@@ -158,11 +174,12 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
         }
         break;
     case _message:
-        // Tuning completed notification
+        // Tuning completed notification etc.
+        ui->textBrowser->append(myMessage);
         break;
     default:
         // if nothing else matches, do the default
-        qDebug() << "@processBuffer: Doing the default case";
+        qDebug() << "@processBuffer: Doing the default case. Buffer = " << Buffer;
         ui->textBrowser->append(Buffer);
       break;
     }
@@ -170,20 +187,20 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
 
 void MainWindow::connected()
 {
-    qDebug() << "connected...";
-    qDebug() << mySendString;
-    // Hey server, switch the gpio
+//    qDebug() << "connected...";
+//    qDebug() << mySendString;
+    // Hey server, who are you?
     tcpSocket->write(mySendString);
 }
 
 void MainWindow::disconnected()
 {
-    qDebug() << "disconnected...";
+//    qDebug() << "disconnected...";
 }
 
 void MainWindow::bytesWritten(qint64 bytes)
 {
-    qDebug() << bytes << " bytes written...";
+//    qDebug() << bytes << " bytes written...";
 }
 
 void MainWindow::on_pushButton_Close_clicked()
