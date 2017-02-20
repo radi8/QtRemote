@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->showMessage("Not connected to remote");
 
 // Connecting to remote
-    remoteIP = "192.168.1.70";
+    remoteIP = "192.168.1.54";
     localPort = 7200;
     remotePort = 8475;
 
@@ -63,6 +63,18 @@ void MainWindow::getData()
 }
 
 void MainWindow::readyRead()
+{
+    Buffer.clear();
+    Buffer.resize(tcpSocket->readBufferSize());
+
+//qDebug() << "reading...";
+    // read the data from the socket into Buffer
+    Buffer = tcpSocket->readAll();
+qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
+    processReceived(Buffer);
+}
+
+void MainWindow::processReceived(QByteArray recdBuf)
 // When data arrives from the remote end, this routine places the sent string
 // into "myMessage". The message will take the form of: cmdNum cmdVal The cmdval
 // may be another number or an information string. The numbers and values are
@@ -89,19 +101,12 @@ void MainWindow::readyRead()
     char * pEnd;
     double cmdVal;
 
-    Buffer.clear();
-    Buffer.resize(tcpSocket->readBufferSize());
-
-//qDebug() << "reading...";
-    // read the data from the socket into Buffer
-    Buffer = tcpSocket->readAll();
-//qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
-    cmd = strtol(Buffer, &pEnd, 10);
+    cmd = strtol(recdBuf, &pEnd, 10);
     if(cmd != _message) {
         cmdValue = strtol (pEnd, &pEnd,10);
     } else {
         myMessage = pEnd;
-        qDebug() << "At else statement: myMessage = " << myMessage;
+//        qDebug() << "At else statement: myMessage = " << myMessage;
     }
 
 //qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
@@ -119,12 +124,12 @@ void MainWindow::readyRead()
         // Tuning completed notification
         break;
     case _volts:
-        cmdVal = cmdValue / 204.6;
+        cmdVal = cmdValue / 51.2;
         ui->frame->meter_dbm = cmdVal;
         ui->frame->update();
         break;
     case _amps:
-        cmdVal = cmdValue / 204.6;
+        cmdVal = cmdValue / 51.2;
         ui->frame->sub_meter_dbm = cmdVal;
         ui->frame->update();
         break;

@@ -79,6 +79,7 @@ private:
     QString remoteIP;
     QString myMessage;
     void sendData();
+    void processReceived(QByteArray recdBuf);
 };
 
 #endif // MAINWINDOW_H
