@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->showMessage("Not connected to remote");
 
 // Connecting to remote
-    remoteIP = "192.168.1.54";
+    remoteIP = "192.168.1.70";
     localPort = 7200;
     remotePort = 8475;
 
@@ -41,6 +41,7 @@ MainWindow::~MainWindow()
 void MainWindow::sendData()
 // Sends the text contained in QByteArray mySendString
 {
+    qDebug() << "@MainWindow::sendData: mySendString = " << mySendString;
     // this is not blocking call
     while(tcpSocket->state() ==  QAbstractSocket::ConnectedState) {
         // Kill time until previous command is sent
@@ -64,17 +65,42 @@ void MainWindow::getData()
 
 void MainWindow::readyRead()
 {
+    QByteArray Buffer;
+
+    // To avoid receiving more than one line at the time but only reading the first one.
+    // Read as many lines as available by checking with canReadLine.
+    while (tcpSocket->canReadLine())
+        {
+            Buffer = QByteArray(tcpSocket->readLine());
+            processReceived(Buffer);
+            qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
+        }
+/*
+    // Make a buffer big enough to hold anything we could conceivably receive.
+    char buf[1024];
+    QByteArray Buffer;
+
+    qint64 lineLength = tcpSocket->readLine(buf, sizeof(buf));
+    qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << buf;
+//        if (lineLength != -1) {
+            // the line is available in Buffer
+//            Buffer = buf;
+//            processReceived(Buffer);
+//        }
+/*
+    QByteArray Buffer;
     Buffer.clear();
     Buffer.resize(tcpSocket->readBufferSize());
 
 //qDebug() << "reading...";
     // read the data from the socket into Buffer
-    Buffer = tcpSocket->readAll();
-qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
-    processReceived(Buffer);
+    Buffer = tcpSocket->readLine();
+    qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
+//    processReceived(Buffer);
+*/
 }
 
-void MainWindow::processReceived(QByteArray recdBuf)
+void MainWindow::processReceived(QByteArray Buffer)
 // When data arrives from the remote end, this routine places the sent string
 // into "myMessage". The message will take the form of: cmdNum cmdVal The cmdval
 // may be another number or an information string. The numbers and values are
@@ -101,7 +127,8 @@ void MainWindow::processReceived(QByteArray recdBuf)
     char * pEnd;
     double cmdVal;
 
-    cmd = strtol(recdBuf, &pEnd, 10);
+//    qDebug() <<"@MainWindow::processReceived: Buffer = " << Buffer;
+    cmd = strtol(Buffer, &pEnd, 10);
     if(cmd != _message) {
         cmdValue = strtol (pEnd, &pEnd,10);
     } else {
@@ -179,7 +206,9 @@ void MainWindow::processReceived(QByteArray recdBuf)
         break;
     case _message:
         // Tuning completed notification etc.
+        if(myMessage == " Receiving from server\r\n") ui->textBrowser->clear();
         ui->textBrowser->append(myMessage);
+//        qDebug() << "Message = " << myMessage;
         break;
     default:
         // if nothing else matches, do the default
@@ -251,11 +280,11 @@ void MainWindow::on_pushButton_Pwr_clicked()
 
     if (ui->pushButton_Pwr->isChecked()) {
         ui->pushButton_Pwr->setStyleSheet("background-color: rgb(255, 155, 155)"); //Light Red
-        mySendString = (QByteArray::number(CMD_PWR_ON, 10) + "\r");
+        mySendString = (QByteArray::number(CMD_PWR_ON, 10) + "\r\n");
         sendData();
     } else {
         ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
-        mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r");
+        mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r\n");
         sendData();
     }
     qDebug() << "mySendString from pwr button = " << mySendString;
@@ -264,7 +293,7 @@ void MainWindow::on_pushButton_Pwr_clicked()
 void MainWindow::on_pushButton_Tune_clicked()
 {
     ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
-    mySendString = (QByteArray::number(CMD_TUNE, 10) + "\r");
+    mySendString = (QByteArray::number(CMD_TUNE, 10) + "\r\n");
     sendData();
     qDebug() << "mySendString from Tune button = " << mySendString;
 }
@@ -277,9 +306,9 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_pBtn_Relay1_clicked()
 {
     if (ui->pBtn_Relay1->isChecked()) {
-        mySendString = (QByteArray::number(CMD_SET_RLY1_ON, 10) + "\r");
+        mySendString = (QByteArray::number(CMD_SET_RLY1_ON, 10) + "\r\n");
     } else {
-        mySendString = (QByteArray::number(CMD_SET_RLY1_OFF, 10) + "\r");
+        mySendString = (QByteArray::number(CMD_SET_RLY1_OFF, 10) + "\r\n");
     }
     sendData();
     qDebug() << "mySendString from Relay1 button = " << mySendString;
@@ -288,9 +317,9 @@ void MainWindow::on_pBtn_Relay1_clicked()
 void MainWindow::on_pBtn_Relay2_clicked()
 {
     if (ui->pBtn_Relay2->isChecked()) {
-        mySendString = (QByteArray::number(CMD_SET_RLY2_ON, 10) + "\r");
+        mySendString = (QByteArray::number(CMD_SET_RLY2_ON, 10) + "\r\n");
     } else {
-        mySendString = (QByteArray::number(CMD_SET_RLY2_OFF, 10) + "\r");
+        mySendString = (QByteArray::number(CMD_SET_RLY2_OFF, 10) + "\r\n");
     }
     sendData();
     qDebug() << "mySendString from Relay2 button = " << mySendString;

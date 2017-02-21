@@ -18,7 +18,7 @@ public:
     ~MainWindow();
 
     QByteArray mySendString;
-    QByteArray Buffer;
+//    QByteArray Buffer;
 
     enum { // Send these commands to ESP01
         CMD_PWR_ON = 1,
