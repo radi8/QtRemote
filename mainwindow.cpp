@@ -42,10 +42,8 @@ void MainWindow::sendData()
 // Sends the text contained in QByteArray mySendString
 {
     qDebug() << "@MainWindow::sendData: mySendString = " << mySendString;
+
     // this is not blocking call
-    while(tcpSocket->state() ==  QAbstractSocket::ConnectedState) {
-        // Kill time until previous command is sent
-    }
     tcpSocket->connectToHost(remoteIP, remotePort);
 
     // we need to wait...
@@ -75,29 +73,6 @@ void MainWindow::readyRead()
             processReceived(Buffer);
             qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
         }
-/*
-    // Make a buffer big enough to hold anything we could conceivably receive.
-    char buf[1024];
-    QByteArray Buffer;
-
-    qint64 lineLength = tcpSocket->readLine(buf, sizeof(buf));
-    qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << buf;
-//        if (lineLength != -1) {
-            // the line is available in Buffer
-//            Buffer = buf;
-//            processReceived(Buffer);
-//        }
-/*
-    QByteArray Buffer;
-    Buffer.clear();
-    Buffer.resize(tcpSocket->readBufferSize());
-
-//qDebug() << "reading...";
-    // read the data from the socket into Buffer
-    Buffer = tcpSocket->readLine();
-    qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
-//    processReceived(Buffer);
-*/
 }
 
 void MainWindow::processReceived(QByteArray Buffer)
