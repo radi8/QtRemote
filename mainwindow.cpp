@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(timer, SIGNAL(timeout()), this, SLOT(getData()));
 
-    timer->start(1000);
+    timer->start(2000); //DEBUG in final version make the timer "timer->start(500)"
     mySendString = (QByteArray::number(CMD_ID, 10) + "\r"); // Get the slave address
     sendData();
     qDebug() << "connecting...";
@@ -55,6 +55,7 @@ void MainWindow::sendData()
     if(!tcpSocket->waitForConnected(5000))
     {
         qDebug() << Q_FUNC_INFO << "Error: " << tcpSocket->errorString();
+        ui->statusBar->showMessage("Error: " + tcpSocket->errorString() );
     }
 }
 
@@ -202,6 +203,7 @@ void MainWindow::connected()
 {
     qDebug() << Q_FUNC_INFO << "Writing to server data in mySendString = " << mySendString;
 
+    ui->statusBar->showMessage("Connected to remote server...");
     tcpSocket->write(mySendString);
     tcpSocket->flush();
 }
