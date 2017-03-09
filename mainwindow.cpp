@@ -39,17 +39,22 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::sendData()
-// Sends the text contained in QByteArray mySendString
+// Sends the text contained in QByteArray mySendString.
+// It is possible that we may be receiving data from the server when a button click etc. gets us here
+// so we wait for the receive to disconnect before sending the data. When we finally connect the slot
+// "MainWindow::connected()" will be called and the data in the buffer is sent from there
 {
-    qDebug() << "@MainWindow::sendData: mySendString = " << mySendString;
-
+    if (tcpSocket->state() != QAbstractSocket::UnconnectedState) {
+        qDebug() << Q_FUNC_INFO << "socket already connected, waiting for process to complete..";
+        tcpSocket->waitForDisconnected(100); //We are only blocking for 100 mSec max
+    }
     // this is not blocking call
     tcpSocket->connectToHost(remoteIP, remotePort);
 
     // we need to wait...
     if(!tcpSocket->waitForConnected(5000))
     {
-        qDebug() << "Error: " << tcpSocket->errorString();
+        qDebug() << Q_FUNC_INFO << "Error: " << tcpSocket->errorString();
     }
 }
 
@@ -71,7 +76,7 @@ void MainWindow::readyRead()
         {
             Buffer = QByteArray(tcpSocket->readLine());
             processReceived(Buffer);
-            qDebug() << "@MainWindow::readyRead(): Value of Buffer = " << Buffer;
+            qDebug() << Q_FUNC_INFO << "Value of Buffer = " << Buffer;
         }
 }
 
@@ -102,17 +107,17 @@ void MainWindow::processReceived(QByteArray Buffer)
     char * pEnd;
     double cmdVal;
 
-//    qDebug() <<"@MainWindow::processReceived: Buffer = " << Buffer;
+//    qDebug() << Q_FUNC_INFO << "Buffer = " << Buffer;
     cmd = strtol(Buffer, &pEnd, 10);
     if(cmd != _message) {
         cmdValue = strtol (pEnd, &pEnd,10);
     } else {
         myMessage = pEnd;
-//        qDebug() << "At else statement: myMessage = " << myMessage;
+//        qDebug() << Q_FUNC_INFO << "At else statement: myMessage = " << myMessage;
     }
 
 //qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
-//qDebug() << "Value of Buffer after cmd extracted = " << Buffer;
+//qDebug() << Q_FUNC_INFO << "Value of Buffer after cmd extracted = " << Buffer;
     switch (cmd) {
     case _pwrSwitch:
         // Power switch status. (0 = power off, 1 = Power on)
@@ -183,11 +188,11 @@ void MainWindow::processReceived(QByteArray Buffer)
         // Tuning completed notification etc.
         if(myMessage == " Receiving from server\r\n") ui->textBrowser->clear();
         ui->textBrowser->append(myMessage);
-//        qDebug() << "Message = " << myMessage;
+//        qDebug() << Q_FUNC_INFO << "Message = " << myMessage;
         break;
     default:
         // if nothing else matches, do the default
-        qDebug() << "@processBuffer: Doing the default case. Buffer = " << Buffer;
+        qDebug() << Q_FUNC_INFO << "Doing the default case. Buffer = " << Buffer;
         ui->textBrowser->append(Buffer);
       break;
     }
@@ -195,21 +200,20 @@ void MainWindow::processReceived(QByteArray Buffer)
 
 void MainWindow::connected()
 {
-    qDebug() << "connected...";
-//    qDebug() << mySendString;
-    // Hey server, who are you?
+    qDebug() << Q_FUNC_INFO << "Writing to server data in mySendString = " << mySendString;
+
     tcpSocket->write(mySendString);
     tcpSocket->flush();
 }
 
 void MainWindow::disconnected()
 {
-    qDebug() << "disconnected by host...";
+    qDebug() << Q_FUNC_INFO << "disconnected by host...";
 }
 
 void MainWindow::bytesWritten(qint64 bytes)
 {
-    qDebug() << bytes << " bytes written...";
+    qDebug() << Q_FUNC_INFO << bytes << " bytes written...";
 }
 
 void MainWindow::on_pushButton_Close_clicked()
@@ -262,7 +266,7 @@ void MainWindow::on_pushButton_Pwr_clicked()
         mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r\n");
         sendData();
     }
-    qDebug() << "mySendString from pwr button = " << mySendString;
+    qDebug() << Q_FUNC_INFO << "mySendString from pwr button = " << mySendString;
 }
 
 void MainWindow::on_pushButton_Tune_clicked()
@@ -270,7 +274,7 @@ void MainWindow::on_pushButton_Tune_clicked()
     ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
     mySendString = (QByteArray::number(CMD_TUNE, 10) + "\r\n");
     sendData();
-    qDebug() << "mySendString from Tune button = " << mySendString;
+    qDebug() << Q_FUNC_INFO << "mySendString from Tune button = " << mySendString;
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -286,7 +290,7 @@ void MainWindow::on_pBtn_Relay1_clicked()
         mySendString = (QByteArray::number(CMD_SET_RLY1_OFF, 10) + "\r\n");
     }
     sendData();
-    qDebug() << "mySendString from Relay1 button = " << mySendString;
+    qDebug() << Q_FUNC_INFO << "mySendString = " << mySendString;
 }
 
 void MainWindow::on_pBtn_Relay2_clicked()
@@ -297,6 +301,6 @@ void MainWindow::on_pBtn_Relay2_clicked()
         mySendString = (QByteArray::number(CMD_SET_RLY2_OFF, 10) + "\r\n");
     }
     sendData();
-    qDebug() << "mySendString from Relay2 button = " << mySendString;
+    qDebug() << Q_FUNC_INFO << "mySendString = " << mySendString;
 }
 
