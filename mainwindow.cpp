@@ -35,6 +35,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    if (ui->pushButton_Pwr->isChecked() ) { // Power button is on
+        mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r\n");
+        sendData(); // Turn power off
+//        qDebug() << "Power turned off before closing";
+    }
+    if (ui->pBtn_Relay1->isChecked() ) { // Power button is on
+        mySendString = (QByteArray::number(CMD_SET_RLY1_OFF, 10) + "\r\n");
+        sendData(); // Turn Relay1 off
+//        qDebug() << "Relay1 turned off before closing";
+    }
+    if (ui->pBtn_Relay2->isChecked() ) { // Power button is on
+        mySendString = (QByteArray::number(CMD_SET_RLY2_OFF, 10) + "\r\n");
+        sendData(); // Turn Relay2 off
+//        qDebug() << "Relay2 turned off before closing";
+    }
     delete ui;
 }
 
@@ -89,7 +104,7 @@ void MainWindow::processReceived(QByteArray Buffer)
 {
 /*
     enum { // Receive these commands/responses from ESP01
-        _pwrSwitch = 1, //Start the emun from 1
+        _pwrSwitch = CMD_ID + 1, (17 as at 2017-3-10)
         _tuneState,
         _volts,
         _amps,
@@ -273,7 +288,6 @@ void MainWindow::on_pushButton_Pwr_clicked()
 
 void MainWindow::on_pushButton_Tune_clicked()
 {
-    ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
     mySendString = (QByteArray::number(CMD_TUNE, 10) + "\r\n");
     sendData();
     qDebug() << Q_FUNC_INFO << "mySendString from Tune button = " << mySendString;
