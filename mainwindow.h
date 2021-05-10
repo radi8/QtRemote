@@ -20,38 +20,49 @@ public:
     QByteArray mySendString;
 //    QByteArray Buffer;
 
-    enum { // Send these commands to ESP01
-        CMD_PWR_ON = 1,
-        CMD_PWR_OFF,
-        CMD_TUNE,
-        CMD_READ_A0,
-        CMD_READ_A1,
-        CMD_READ_A2,
-        CMD_READ_D2,
-        CMD_READ_D3,
-        CMD_SET_RLY1_ON,
-        CMD_SET_RLY1_OFF,
-        CMD_SET_RLY2_ON,
-        CMD_SET_RLY2_OFF,
-        CMD_SET_LED_HI,
-        CMD_SET_LED_LO,
-        CMD_STATUS,
-        CMD_ID // Always keep this last
+    enum { // Receive commands from tcp client. Send commands to I2C slave.
+      CMD_PWR_ON = 1, //Start the enum from 1
+      CMD_PWR_OFF,
+      CMD_RLY1_ON,    // HiQSDR
+      CMD_RLY1_OFF,
+      CMD_RLY2_ON,    //HermesLite
+      CMD_RLY2_OFF,
+      CMD_RLY3_ON,    // Linear
+      CMD_RLY3_OFF,
+      CMD_RLY4_ON,    // Tuner
+      CMD_RLY4_OFF,
+      CMD_TUNE_DN,
+      CMD_TUNE_UP,
+      CMD_RADIO_0,    // No antenna selected
+      CMD_RADIO_1,    // wire Antenna selected
+      CMD_RADIO_2,
+      CMD_RADIO_3,
+      CMD_RADIO_4,
+      CMD_READ_A0,    // Shack voltage
+      CMD_READ_A1,
+      CMD_READ_A2,
+      CMD_READ_D2,    // Digital input via opto-coupler
+      CMD_READ_D3,
+      CMD_SET_LED_HI,
+      CMD_SET_LED_LO,
+      CMD_STATUS,
+      CMD_ID // Always keep this last
     };
 
-    enum { // Receive these commands/responses from ESP01
-        _pwrSwitch = CMD_ID + 1,
-        _tuneState,
-        _volts,
-        _amps,
-        _analog2,
-        _digital2,
-        _digital3,
-        _rly1,
-        _rly2,
-        _antenna,
-        _message
+    enum { // Receive commands from remoteArduino (I2C slave) via ESP01.
+      _pwrSwitch = CMD_ID + 1,
+      _tuneState,
+      _volts,
+      _amps,
+      _analog2,
+      _digital2,
+      _digital3,
+      _rly1,
+      _rly2,
+      _antenna,
+      _message
     };
+
 public slots:
 
 private slots:
@@ -65,10 +76,12 @@ private slots:
     void on_pushButton_Close_clicked();
     void on_pushButton_Pwr_clicked();
     void on_actionSettings_triggered();
-    void on_pushButton_Tune_clicked();
-    void on_pushButton_2_clicked();
     void on_pBtn_Relay2_clicked();
     void on_pBtn_Relay1_clicked();
+    void on_pBtn_Relay3_clicked();
+    void on_pBtn_Relay4_clicked();
+    void on_pBtn_Tune_pressed();
+    void on_pBtn_Tune_released();
 
 private:
     Ui::MainWindow *ui;
