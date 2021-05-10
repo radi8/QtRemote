@@ -6,9 +6,9 @@ QtRemote is a client to switch on and off equipment in a remotely placed locatio
 
 In this repository you can find the code for the server which is in two separate units for the ESP01 and the Arduino nano plus the Kicad files for the PCB layout. I have shown the circuit diagram below for your reference.
 
-remoteESP-01
-remoteArduino
-Remote_Monitor
+* remoteESP-01
+* remoteArduino
+* Remote_Monitor
 
 
 <img src="images/Remote_Monitor.png">
