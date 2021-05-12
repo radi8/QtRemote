@@ -3,6 +3,7 @@
 #include "mysettings.h"
 #include <qthread.h>
 #include <QCloseEvent>
+#include <QtWidgets>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -35,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(timer, SIGNAL(timeout()), this, SLOT(getData()));
 
+    readSettings();
+
     timer->start(20000); //DEBUG in final version make the timer "timer->start(500)"
 //    mySendString = (QByteArray::number(CMD_ID, 10) + "\r"); // Get the slave address
 //    sendData();
@@ -45,29 +48,38 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-
-    if (ui->pushButton_Pwr->isChecked() ) { // Power button is on
-        mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r\n");
-        sendData(); // Turn power off
-        qDebug() << "Power turned off before closing";
-    }
-
-    if (ui->pBtn_Relay1->isChecked() ) { // Relay1 is operated
-        mySendString = (QByteArray::number(CMD_RLY1_OFF, 10) + "\r\n");
-        sendData(); // Turn Relay1 off
-        qDebug() << "Relay1 turned off before closing";
-    }
-/*
-    if (ui->pBtn_Relay2->isChecked() ) { // Relay2 is operated
-        mySendString = (QByteArray::number(CMD_RLY2_OFF, 10) + "\r\n");
-        sendData(); // Turn Relay2 off
-//        qDebug() << "Relay2 turned off before closing";
-*/
-//    }
-//    ui->pushButton_Pwr->setChecked(true);
-//    on_pushButton_Pwr_clicked();
     delete ui;
 }
+
+//-----------------------------------------------------------------------------------------------------------------
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    writeSettings();
+    ui->pushButton_Pwr->setChecked(false);
+    on_pushButton_Pwr_clicked();
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
+    if (geometry.isEmpty()) {
+        const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+        move((availableGeometry.width() - width()) / 2,
+             (availableGeometry.height() - height()) / 2);
+    } else {
+        restoreGeometry(geometry);
+    }
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    settings.setValue("geometry", saveGeometry());
+}
+
+//-----------------------------------------------------------------------------------------------------------------
 
 void MainWindow::sendData()
 // Sends the text contained in QByteArray mySendString.

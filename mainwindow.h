@@ -16,9 +16,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void loadFile(const QString &fileName);
 
     QByteArray mySendString;
-//    QByteArray Buffer;
 
     enum { // Receive commands from tcp client. Send commands to I2C slave.
       CMD_PWR_ON = 1, //Start the enum from 1
@@ -65,13 +65,17 @@ public:
 
 public slots:
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void connected();
     void disconnected();
     void bytesWritten(qint64 bytes);
     void readyRead();
     void getData();
-
+    void readSettings();
+    void writeSettings();
     void on_pushButton_Clear_clicked();
     void on_pushButton_Close_clicked();
     void on_pushButton_Pwr_clicked();
@@ -93,6 +97,7 @@ private:
     QString myMessage;
     void sendData();
     void processReceived(QByteArray recdBuf);
+//    const QRect availableGeometry;
 };
 
 #endif // MAINWINDOW_H
