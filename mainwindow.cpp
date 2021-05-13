@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    mySendString = (QByteArray::number(CMD_ID, 10) + "\r"); // Get the slave address
 //    sendData();
     qDebug() << "connecting...";
+    qDebug() <<  QApplication::style()->objectName();
 } //end constructor
 
 
