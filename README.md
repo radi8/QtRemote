@@ -13,4 +13,4 @@ In this repository you can find the code for the server which is in two separate
 * Remote_Monitor
 
 
-<img src="images/Remote_Monitor.png"width="10">
+<img src="images/Remote_Monitor.png" width="10">
