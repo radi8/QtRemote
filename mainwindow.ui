@@ -159,6 +159,9 @@
       <height>22</height>
      </rect>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="text">
      <string>Close</string>
     </property>
@@ -173,7 +176,7 @@
      </rect>
     </property>
     <property name="frameShape">
-     <enum>QFrame::Panel</enum>
+     <enum>QFrame::WinPanel</enum>
     </property>
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
@@ -191,6 +194,9 @@
       <height>22</height>
      </rect>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="text">
      <string>Tune</string>
     </property>
@@ -207,12 +213,12 @@
     <property name="title">
      <string>Select Antenna</string>
     </property>
-    <widget class="QRadioButton" name="radioButton">
+    <widget class="QRadioButton" name="radioButton_1">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>20</y>
-       <width>104</width>
+       <width>81</width>
        <height>21</height>
       </rect>
      </property>
@@ -226,9 +232,9 @@
     <widget class="QRadioButton" name="radioButton_2">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>40</y>
-       <width>104</width>
+       <width>81</width>
        <height>21</height>
       </rect>
      </property>
@@ -239,9 +245,9 @@
     <widget class="QRadioButton" name="radioButton_3">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>60</y>
-       <width>104</width>
+       <width>81</width>
        <height>21</height>
       </rect>
      </property>
@@ -252,9 +258,9 @@
     <widget class="QRadioButton" name="radioButton_4">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>80</y>
-       <width>104</width>
+       <width>81</width>
        <height>21</height>
       </rect>
      </property>
@@ -265,9 +271,9 @@
     <widget class="QRadioButton" name="radioButton_5">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>10</x>
        <y>100</y>
-       <width>104</width>
+       <width>81</width>
        <height>21</height>
       </rect>
      </property>
@@ -283,7 +289,7 @@
      <x>0</x>
      <y>0</y>
      <width>288</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -298,6 +304,9 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Settings</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QLabel>
+#include "mysettings.h"
 
 namespace Ui {
 class MainWindow;
@@ -16,8 +17,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void loadFile(const QString &fileName);
 
+    void loadFile(const QString &fileName);
     QByteArray mySendString;
 
     enum { // Receive commands from tcp client. Send commands to I2C slave.
@@ -61,9 +62,10 @@ public:
       _rly2,
       _antenna,
       _message
-    };
+    };  
 
 public slots:
+    void setPbtnText(QString, int);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -80,8 +82,8 @@ private slots:
     void on_pushButton_Close_clicked();
     void on_pushButton_Pwr_clicked();
     void on_actionSettings_triggered();
-    void on_pBtn_Relay2_clicked();
     void on_pBtn_Relay1_clicked();
+    void on_pBtn_Relay2_clicked();
     void on_pBtn_Relay3_clicked();
     void on_pBtn_Relay4_clicked();
     void on_pBtn_Tune_pressed();
@@ -97,7 +99,8 @@ private:
     QString myMessage;
     void sendData();
     void processReceived(QByteArray recdBuf);
-//    const QRect availableGeometry;
+
+    mySettings mSettings;
 };
 
 #endif // MAINWINDOW_H
