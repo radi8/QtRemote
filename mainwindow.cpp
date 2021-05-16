@@ -120,6 +120,24 @@ void MainWindow::readSettings()
         restoreGeometry(geometry);
     }
     settings.endGroup();
+
+    settings.beginGroup("relaySettings");
+    if(settings.contains("IP_address")) remoteIP = settings.value("IP_address").toString();
+    if(settings.contains("Port")) remotePort = (settings.value("Port")).toString().toShort();
+    if(settings.contains("Relay1"))ui->pBtn_Relay1->setText(settings.value("Relay1").toString());
+    if(settings.contains("Relay2"))ui->pBtn_Relay2->setText(settings.value("Relay2").toString());
+    if(settings.contains("Relay3"))ui->pBtn_Relay3->setText(settings.value("Relay3").toString());
+    if(settings.contains("Relay4"))ui->pBtn_Relay4->setText(settings.value("Relay4").toString());
+    if(settings.contains("Relay5"))ui->pBtn_Tune->setText(settings.value("Relay5").toString());
+    settings.endGroup(); // end of group "relaySettings"
+
+    settings.beginGroup("antennaSettings");
+    if(settings.contains("Antenna1"))ui->radioButton_1->setText(settings.value("Antenna1").toString());
+    if(settings.contains("Antenna2"))ui->radioButton_2->setText(settings.value("Antenna2").toString());
+    if(settings.contains("Antenna3"))ui->radioButton_3->setText(settings.value("Antenna3").toString());
+    if(settings.contains("Antenna4"))ui->radioButton_4->setText(settings.value("Antenna4").toString());
+    if(settings.contains("Antenna5"))ui->radioButton_5->setText(settings.value("Antenna5").toString());
+    settings.endGroup(); // end of group "antennaSettings"
 }
 
 void MainWindow::writeSettings()
