@@ -69,9 +69,12 @@ void mySettings::writeSettings()
 {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
 
-    settings.beginGroup("relaySettings");
+    settings.beginGroup("tcpSettings");
     settings.setValue("IP_address",ui->lineEdit_sIP->text());
     settings.setValue("Port",ui->lineEdit_sPort->text());
+    settings.endGroup(); // end of group "tcpSettings"
+
+    settings.beginGroup("relaySettings");
     settings.setValue("Relay1",ui->lineEdit_rly01->text());
     settings.setValue("Relay2",ui->lineEdit_rly02->text());
     settings.setValue("Relay3",ui->lineEdit_rly03->text());

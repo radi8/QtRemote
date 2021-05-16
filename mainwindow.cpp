@@ -121,9 +121,12 @@ void MainWindow::readSettings()
     }
     settings.endGroup();
 
-    settings.beginGroup("relaySettings");
+    settings.beginGroup("tcpSettings");
     if(settings.contains("IP_address")) remoteIP = settings.value("IP_address").toString();
     if(settings.contains("Port")) remotePort = (settings.value("Port")).toString().toShort();
+    settings.endGroup(); // end of group "tcpSettings"
+
+    settings.beginGroup("relaySettings");
     if(settings.contains("Relay1"))ui->pBtn_Relay1->setText(settings.value("Relay1").toString());
     if(settings.contains("Relay2"))ui->pBtn_Relay2->setText(settings.value("Relay2").toString());
     if(settings.contains("Relay3"))ui->pBtn_Relay3->setText(settings.value("Relay3").toString());
