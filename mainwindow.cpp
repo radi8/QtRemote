@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "mysettings.h"
+#include "ui_mysettings.h"
 #include <qthread.h>
 #include <QCloseEvent>
 #include <QtWidgets>
@@ -10,7 +11,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
+//    ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
+    ui->pushButton_Pwr->setStyleSheet("background-color: rgb(0, 170, 0)"); //Green
+
     setWindowTitle(tr("Remote controller"));
     statusLabel = new QLabel(this);
     ui->statusBar->addWidget(statusLabel);
@@ -20,8 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     localPort = 7200;
     remoteIP = "192.168.1.70";
     remotePort = 8475;
-//    remoteIP = "127.0.0.1";
-//    remotePort = 10000;
 
     tcpSocket = new QTcpSocket(this);
     QTimer *timer = new QTimer(this);
@@ -39,8 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     readSettings();
 
     timer->start(20000); //DEBUG in final version make the timer "timer->start(500)"
-//    mySendString = (QByteArray::number(CMD_ID, 10) + "\r"); // Get the slave address
-//    sendData();
+
     qDebug() << "connecting...";
     qDebug() <<  QApplication::style()->objectName();
 } //end constructor
@@ -50,6 +50,50 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setPbtnText(QString txt, int btn)
+{
+    switch (btn) {
+    case 1: //IP Address
+        remoteIP = txt;
+        break;
+    case 2: // Port
+        remotePort = txt.toShort(); // port is qint16 == short
+        break;
+    case 3: //First relay
+        ui->pBtn_Relay1->setText(txt);
+        break;
+    case 4:
+        ui->pBtn_Relay2->setText(txt);
+        break;
+    case 5:
+        ui->pBtn_Relay3->setText(txt);
+        break;
+    case 6:
+        ui->pBtn_Relay4->setText(txt);
+        break;
+    case 7:
+        ui->pBtn_Tune->setText(txt);
+        break;
+    case 8: // First antenna switch
+        ui->radioButton_1->setText(txt);
+        break;
+    case 9:
+        ui->radioButton_2->setText(txt);
+        break;
+    case 10:
+        ui->radioButton_3->setText(txt);
+        break;
+    case 11:
+        ui->radioButton_4->setText(txt);
+        break;
+    case 12:
+        ui->radioButton_5->setText(txt);
+        break;
+    default:
+        break;
+    }
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -64,6 +108,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::readSettings()
 {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+
+//    settings->beginGroup("Geometry");
+    settings.beginGroup("Geometry");
     const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
     if (geometry.isEmpty()) {
         const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
@@ -72,12 +119,16 @@ void MainWindow::readSettings()
     } else {
         restoreGeometry(geometry);
     }
+    settings.endGroup();
 }
 
 void MainWindow::writeSettings()
 {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+
+    settings.beginGroup("Geometry");
     settings.setValue("geometry", saveGeometry());
+    settings.endGroup();
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -306,6 +357,7 @@ void MainWindow::on_actionSettings_triggered()
 {
     mySettings mSettings;
     mSettings.setModal(true);
+    connect(&mSettings,SIGNAL(sendText(QString,int)), this, SLOT(setPbtnText(QString,int)));
     mSettings.exec();
 }
 /*
@@ -333,7 +385,7 @@ void MainWindow::on_pushButton_Pwr_clicked()
 {
 
     if (ui->pushButton_Pwr->isChecked()) {
-        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(255, 155, 155)"); //Light Red
+        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(255, 0, 0)"); //Red
         mySendString = (QByteArray::number(CMD_PWR_ON, 10) + "\r\n");
         sendData();
         getData();
@@ -366,7 +418,7 @@ void MainWindow::on_pushButton_Pwr_clicked()
         }
         QThread::msleep(50);
 
-        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(85, 255, 0)"); //Green
+        ui->pushButton_Pwr->setStyleSheet("background-color: rgb(0, 170, 0)"); //Green
         mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r\n");
         sendData();
     }
