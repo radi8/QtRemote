@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>288</width>
-    <height>427</height>
+    <height>396</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,7 +48,7 @@
       <x>120</x>
       <y>180</y>
       <width>161</width>
-      <height>171</height>
+      <height>141</height>
      </rect>
     </property>
    </widget>
@@ -56,7 +56,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>360</y>
+      <y>330</y>
       <width>80</width>
       <height>22</height>
      </rect>
@@ -154,7 +154,7 @@
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>360</y>
+      <y>330</y>
       <width>80</width>
       <height>22</height>
      </rect>
@@ -207,7 +207,7 @@
       <x>10</x>
       <y>220</y>
       <width>101</width>
-      <height>131</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="title">
@@ -223,7 +223,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>None</string>
+      <string>Dummy</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -252,7 +252,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Beam</string>
+      <string>Mag Loop</string>
      </property>
     </widget>
     <widget class="QRadioButton" name="radioButton_4">
@@ -265,20 +265,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Loop</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="radioButton_5">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>100</y>
-       <width>81</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Dummy</string>
+      <string>LoG</string>
      </property>
     </widget>
    </widget>

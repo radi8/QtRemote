@@ -31,7 +31,7 @@ void mySettings::on_pBtn_01_clicked()
     emit sendText(ui->lineEdit_rBtn02->text(), 9);
     emit sendText(ui->lineEdit_rBtn03->text(), 10);
     emit sendText(ui->lineEdit_rBtn04->text(), 11);
-    emit sendText(ui->lineEdit_rBtn05->text(), 12);
+//    emit sendText(ui->lineEdit_rBtn05->text(), 12);
     // Now save the labels
     writeSettings();
     close();
@@ -61,7 +61,7 @@ void mySettings::readSettings()
     if(settings.contains("Antenna2"))ui->lineEdit_rBtn02->setText(settings.value("Antenna2").toString());
     if(settings.contains("Antenna3"))ui->lineEdit_rBtn03->setText(settings.value("Antenna3").toString());
     if(settings.contains("Antenna4"))ui->lineEdit_rBtn04->setText(settings.value("Antenna4").toString());
-    if(settings.contains("Antenna5"))ui->lineEdit_rBtn05->setText(settings.value("Antenna5").toString());
+//    if(settings.contains("Antenna5"))ui->lineEdit_rBtn05->setText(settings.value("Antenna5").toString());
     settings.endGroup(); // end of group "antennaSettings"
 }
 
@@ -87,6 +87,6 @@ void mySettings::writeSettings()
     settings.setValue("Antenna2",ui->lineEdit_rBtn02->text());
     settings.setValue("Antenna3",ui->lineEdit_rBtn03->text());
     settings.setValue("Antenna4",ui->lineEdit_rBtn04->text());
-    settings.setValue("Antenna5",ui->lineEdit_rBtn05->text());
+//    settings.setValue("AntennaSelected",ui->lineEdit_rBtn05->text());
     settings.endGroup(); // end of group "antennaSettings"
 }

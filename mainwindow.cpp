@@ -53,6 +53,8 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::setPbtnText(QString txt, int btn)
+// This is a slot connected to the settings window when it is opened to write
+// any settings to the  main window.
 {
     switch (btn) {
     case 1: //IP Address
@@ -87,9 +89,6 @@ void MainWindow::setPbtnText(QString txt, int btn)
         break;
     case 11:
         ui->radioButton_4->setText(txt);
-        break;
-    case 12:
-        ui->radioButton_5->setText(txt);
         break;
     default:
         break;
@@ -139,8 +138,9 @@ void MainWindow::readSettings()
     if(settings.contains("Antenna2"))ui->radioButton_2->setText(settings.value("Antenna2").toString());
     if(settings.contains("Antenna3"))ui->radioButton_3->setText(settings.value("Antenna3").toString());
     if(settings.contains("Antenna4"))ui->radioButton_4->setText(settings.value("Antenna4").toString());
-    if(settings.contains("Antenna5"))ui->radioButton_5->setText(settings.value("Antenna5").toString());
+    if(settings.contains("AntennaSelected"))SelectedAntenna = (settings.value("AntennaSelected").toInt());
     settings.endGroup(); // end of group "antennaSettings"
+    selectAnt();
 }
 
 void MainWindow::writeSettings()
@@ -149,6 +149,13 @@ void MainWindow::writeSettings()
 
     settings.beginGroup("Geometry");
     settings.setValue("geometry", saveGeometry());
+    settings.endGroup();
+
+    settings.beginGroup("antennaSettings");
+    if (ui->radioButton_1->isChecked())settings.setValue("AntennaSelected", 1);
+    if (ui->radioButton_2->isChecked())settings.setValue("AntennaSelected", 2);
+    if (ui->radioButton_3->isChecked())settings.setValue("AntennaSelected", 3);
+    if (ui->radioButton_4->isChecked())settings.setValue("AntennaSelected", 4);
     settings.endGroup();
 }
 
@@ -244,7 +251,7 @@ void MainWindow::processReceived(QByteArray Buffer)
 //        qDebug() << Q_FUNC_INFO << "At else statement: myMessage = " << myMessage;
     }
 
-//qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
+qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
 //qDebug() << Q_FUNC_INFO << "Value of Buffer after cmd extracted = " << Buffer;
     switch (cmd) {
     case CMD_PWR_ON:
@@ -284,6 +291,19 @@ void MainWindow::processReceived(QByteArray Buffer)
     case CMD_TUNE_UP:
             ui->textBrowser->append("Tune button released");
         break;
+    case CMD_ANT_1:
+        ui->textBrowser->append(ui->radioButton_1->text() + " selected");
+        break;
+    case CMD_ANT_2:
+        ui->textBrowser->append(ui->radioButton_2->text() + " selected");
+        break;
+    case CMD_ANT_3:
+        ui->textBrowser->append(ui->radioButton_3->text() + " selected");
+        break;
+    case CMD_ANT_4:
+        ui->textBrowser->append(ui->radioButton_4->text() + " selected");
+        break;
+
     case _tuneState:
         // Tuning completed notification
         break;
@@ -309,18 +329,6 @@ void MainWindow::processReceived(QByteArray Buffer)
     case _antenna:
         // Selected antenna status
         switch (cmdValue) {
-        case 0:
-            ui->textBrowser->append("No antenna selected");
-            break;
-        case 1:
-            ui->textBrowser->append("Antenna 1 selected");
-            break;
-        case 2:
-            ui->textBrowser->append("Antenna 2 selected");
-            break;
-        case 3:
-            ui->textBrowser->append("Antenna 3 selected");
-            break;
         default:
             break;
         }
@@ -381,30 +389,38 @@ void MainWindow::on_actionSettings_triggered()
     connect(&mSettings,SIGNAL(sendText(QString,int)), this, SLOT(setPbtnText(QString,int)));
     mSettings.exec();
 }
-/*
-    enum { // enum placed here for easy reference
-        CMD_PWR_ON = 1, //Start the enum from 1
-        CMD_PWR_OFF,
-        CMD_TUNE,
-        CMD_READ_A0,
-        CMD_READ_A1,
-        CMD_READ_A2,
-        CMD_D2_HI,
-        CMD_D2_LO,
-        CMD_D3_HI,
-        CMD_D3_LO,
-        CMD_SET_RLY1_ON,
-        CMD_SET_RLY1_OFF,
-        CMD_SET_RLY2_ON,
-        CMD_SET_RLY2_OFF,
-        CMD_SET_LED_HI,
-        CMD_SET_LED_LO,
-        CMD_STATUS,
-        CMD_ID
-    }; */
+/* This is the enum currently in remoteArduino.ino
+ *
+    enum { // Receive commands from tcp client. Send commands to I2C slave.
+      CMD_PWR_ON = 1, //Start the enum from 1
+      CMD_PWR_OFF,
+      CMD_RLY1_ON,    // HiQSDR
+      CMD_RLY1_OFF,
+      CMD_RLY2_ON,    //HermesLite
+      CMD_RLY2_OFF,
+      CMD_RLY3_ON,    // Linear
+      CMD_RLY3_OFF,
+      CMD_RLY4_ON,    // Tuner
+      CMD_RLY4_OFF,
+      CMD_TUNE_DN,
+      CMD_TUNE_UP,
+      CMD_ANT_1,    // No antenna selected (Dummy Load)
+      CMD_ANT_2,    // Wire
+      CMD_ANT_3,    // Mag Loop
+      CMD_ANT_4,    // LoG
+      CMD_READ_A0,    // Shack voltage
+      CMD_READ_A1,
+      CMD_READ_A2,
+      CMD_READ_D2,    // Digital input via opto-coupler
+      CMD_READ_D3,
+      CMD_SET_LED_HI,
+      CMD_SET_LED_LO,
+      CMD_STATUS,
+      CMD_ID // Always keep this last
+    };
+ */
 void MainWindow::on_pushButton_Pwr_clicked()
 {
-
     if (ui->pushButton_Pwr->isChecked()) {
         ui->pushButton_Pwr->setStyleSheet("background-color: rgb(255, 0, 0)"); //Red
         mySendString = (QByteArray::number(CMD_PWR_ON, 10) + "\r\n");
@@ -518,4 +534,76 @@ void MainWindow::on_pBtn_Tune_released()
     mySendString = (QByteArray::number(CMD_TUNE_UP, 10) + "\r\n");
     sendData();
     qDebug() << Q_FUNC_INFO << "mySendString from Tune button = " << mySendString;
+}
+
+/*
+      CMD_ANT_1,    // No antenna selected (Dummy Load)
+      CMD_ANT_2,    // Wire
+      CMD_ANT_3,    // Mag Loop
+      CMD_ANT_4,    // LoG
+*/
+
+void MainWindow::on_radioButton_1_clicked()
+{
+    if (ui->pushButton_Pwr->isChecked()) {
+        mySendString = (QByteArray::number(CMD_ANT_1, 10) + "\r\n");
+        sendData();
+        qDebug() << Q_FUNC_INFO << "mySendString from " << ui->radioButton_1->text() << "button = " << mySendString;
+    } else {
+        selectAnt();
+    }
+}
+
+void MainWindow::on_radioButton_2_clicked()
+{
+    if (ui->pushButton_Pwr->isChecked()) {
+        mySendString = (QByteArray::number(CMD_ANT_2, 10) + "\r\n");
+        sendData();
+        qDebug() << Q_FUNC_INFO << "mySendString from " << ui->radioButton_2->text() << "button = " << mySendString;
+    } else {
+        selectAnt();
+    }
+}
+
+void MainWindow::on_radioButton_3_clicked()
+{
+    if (ui->pushButton_Pwr->isChecked()) {
+        mySendString = (QByteArray::number(CMD_ANT_3, 10) + "\r\n");
+        sendData();
+        qDebug() << Q_FUNC_INFO << "mySendString from " << ui->radioButton_3->text() << "button = " << mySendString;
+    } else {
+        selectAnt();
+    }
+}
+
+void MainWindow::on_radioButton_4_clicked()
+{
+    if (ui->pushButton_Pwr->isChecked()) {
+        mySendString = (QByteArray::number(CMD_ANT_4, 10) + "\r\n");
+        sendData();
+        qDebug() << Q_FUNC_INFO << "mySendString from " << ui->radioButton_4->text() << "button = " << mySendString;
+    } else {
+        selectAnt();
+    }
+}
+
+void MainWindow::selectAnt()
+{
+    switch (SelectedAntenna) {
+        case 1:
+            ui->radioButton_1->setChecked(true);
+        break;
+        case 2:
+            ui->radioButton_2->setChecked(true);
+        break;
+        case 3:
+            ui->radioButton_3->setChecked(true);
+        break;
+        case 4:
+            ui->radioButton_4->setChecked(true);
+        break;
+        default:
+            ui->radioButton_1->setChecked(true);
+        break;
+    }
 }

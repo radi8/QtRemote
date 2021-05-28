@@ -34,11 +34,13 @@ public:
       CMD_RLY4_OFF,
       CMD_TUNE_DN,
       CMD_TUNE_UP,
-      CMD_RADIO_0,    // No antenna selected
-      CMD_RADIO_1,    // wire Antenna selected
-      CMD_RADIO_2,
-      CMD_RADIO_3,
-      CMD_RADIO_4,
+
+      CMD_ANT_0,    // ***** Remove in final version ******
+
+      CMD_ANT_1,    // No antenna selected (Dummy Load)
+      CMD_ANT_2,    // Wire
+      CMD_ANT_3,    // Mag Loop
+      CMD_ANT_4,    // LoG
       CMD_READ_A0,    // Shack voltage
       CMD_READ_A1,
       CMD_READ_A2,
@@ -89,6 +91,14 @@ private slots:
     void on_pBtn_Tune_pressed();
     void on_pBtn_Tune_released();
 
+    void on_radioButton_2_clicked();
+
+    void on_radioButton_1_clicked();
+
+    void on_radioButton_3_clicked();
+
+    void on_radioButton_4_clicked();
+
 private:
     Ui::MainWindow *ui;
     QTcpSocket *tcpSocket;
@@ -99,6 +109,8 @@ private:
     QString myMessage;
     void sendData();
     void processReceived(QByteArray recdBuf);
+    void selectAnt();
+    int SelectedAntenna = 1;
 
     mySettings mSettings;
 };
