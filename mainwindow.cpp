@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     readSettings();
 
-    timer->start(20000); //DEBUG in final version make the timer "timer->start(500)"
+    timer->start(500); //DEBUG in final version make the timer "timer->start(500)"
 
     qDebug() << "connecting...";
     qDebug() <<  QApplication::style()->objectName();
@@ -216,22 +216,6 @@ void MainWindow::processReceived(QByteArray Buffer)
 // may be another number or an information string. The numbers and values are
 // extracted and converted to long integers or a string if cmdVal is a message.
 {
-/*
-    enum { // Receive commands from remoteArduino (I2C slave) via ESP01.
-      _pwrSwitch = CMD_ID + 1,
-      _tuneState,
-      _volts,
-      _amps,
-      _analog2,
-      _digital2,
-      _digital3,
-      _rly1,
-      _rly2,
-      _antenna,
-      _message
-    };
-*/
-
     long cmd;
     long cmdValue;
     char * pEnd;
@@ -239,16 +223,18 @@ void MainWindow::processReceived(QByteArray Buffer)
     bool ok;
 
 //    qDebug() << Q_FUNC_INFO << "Buffer = " << Buffer;
-
+//    Buffer.resize(Buffer.indexOf('\r'));
     cmd = strtol(Buffer, &pEnd, 10);
+    pEnd++; // Step over the space delimiter
+    Buffer = pEnd;
+
 //    cmd = Buffer.toLong(&ok, 10);
 //    Buffer.replace('\r', '\0');
-    Buffer.resize(Buffer.indexOf('\r'));
-    if(cmd != _message) {
-        cmdValue = strtol (pEnd, &pEnd,10);
+//    Buffer.resize(Buffer.indexOf('\r'));
+    if(Buffer != "OK") {
+        cmdValue = strtol(Buffer, &pEnd, 10);
     } else {
-        myMessage = pEnd;
-//        qDebug() << Q_FUNC_INFO << "At else statement: myMessage = " << myMessage;
+        qDebug() << Q_FUNC_INFO << "At else statement: pEnd = " << Buffer;
     }
 
 qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
@@ -256,59 +242,59 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
     switch (cmd) {
     case CMD_PWR_ON:
         // Power switch status. (0 = power off, 1 = Power on)
-            ui->textBrowser->append("Power on");
+            ui->textBrowser->append("Power on .. " + Buffer);
         break;
     case CMD_PWR_OFF:
-            ui->textBrowser->append("Power off");
+            ui->textBrowser->append("Power off .. " + Buffer);
         break;
     case CMD_RLY1_ON:
-             ui->textBrowser->append("HiQSDR switched on");
+             ui->textBrowser->append("HiQSDR power up .. " + Buffer);
         break;
     case CMD_RLY1_OFF:
-            ui->textBrowser->append("HiQSDR switched off");
+            ui->textBrowser->append("HiQSDR power dn .. " + Buffer);
         break;
     case CMD_RLY2_ON:
-            ui->textBrowser->append("HL2 switched on");
+            ui->textBrowser->append("HL2 power up .. " + Buffer);
         break;
     case CMD_RLY2_OFF:
-            ui->textBrowser->append("HL2 switched off");
+            ui->textBrowser->append("HL2 power dn .. " + Buffer);
         break;
     case CMD_RLY3_ON:
-            ui->textBrowser->append("Linear switched on");
+            ui->textBrowser->append("Linear power up .. " + Buffer);
         break;
     case CMD_RLY3_OFF:
-            ui->textBrowser->append("Linear switched off");
+            ui->textBrowser->append("Linear power dn .. " + Buffer);
         break;
     case CMD_RLY4_ON:
-            ui->textBrowser->append("Tuner switched on");
+            ui->textBrowser->append("Tuner power up " + Buffer);
         break;
     case CMD_RLY4_OFF:
-            ui->textBrowser->append("Tuner switched off");
+            ui->textBrowser->append("Tuner power dn .. " + Buffer);
         break;
     case CMD_TUNE_DN:
-            ui->textBrowser->append("Tune button pressed");
+            ui->textBrowser->append("Tune button dn .. " + Buffer);
         break;
     case CMD_TUNE_UP:
-            ui->textBrowser->append("Tune button released");
+            ui->textBrowser->append("Tune button up .. " + Buffer);
         break;
     case CMD_ANT_1:
-        ui->textBrowser->append(ui->radioButton_1->text() + " selected");
+        ui->textBrowser->append(ui->radioButton_1->text() + " selected .. " + Buffer);
         break;
     case CMD_ANT_2:
-        ui->textBrowser->append(ui->radioButton_2->text() + " selected");
+        ui->textBrowser->append(ui->radioButton_2->text() + " selected .. " + Buffer);
         break;
     case CMD_ANT_3:
-        ui->textBrowser->append(ui->radioButton_3->text() + " selected");
+        ui->textBrowser->append(ui->radioButton_3->text() + " selected .. " + Buffer);
         break;
     case CMD_ANT_4:
-        ui->textBrowser->append(ui->radioButton_4->text() + " selected");
+        ui->textBrowser->append(ui->radioButton_4->text() + " selected .. " + Buffer);
         break;
 
     case _tuneState:
         // Tuning completed notification
         break;
-    case _volts:
-        cmdVal = cmdValue / 51.2;
+    case CMD_READ_A0:
+        cmdVal = cmdValue / 49.026; // 51.2
         ui->frame->meter_dbm = cmdVal;
         ui->frame->update();
         break;
@@ -325,13 +311,6 @@ qDebug() << "command received = " << cmd << " and command value = " << cmdValue;
         break;
     case _digital3:
 //        ui->textBrowser->append("Digital 3 data returned");
-        break;
-    case _antenna:
-        // Selected antenna status
-        switch (cmdValue) {
-        default:
-            break;
-        }
         break;
     case _message:
         // Tuning completed notification etc.

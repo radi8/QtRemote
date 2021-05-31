@@ -24,32 +24,29 @@ public:
     enum { // Receive commands from tcp client. Send commands to I2C slave.
       CMD_PWR_ON = 1, //Start the enum from 1
       CMD_PWR_OFF,
-      CMD_RLY1_ON,    // HiQSDR
+      CMD_RLY1_ON,      // HiQSDR
       CMD_RLY1_OFF,
-      CMD_RLY2_ON,    //HermesLite
+      CMD_RLY2_ON,      //HermesLite
       CMD_RLY2_OFF,
-      CMD_RLY3_ON,    // Linear
+      CMD_RLY3_ON,      // Linear
       CMD_RLY3_OFF,
-      CMD_RLY4_ON,    // Tuner
+      CMD_RLY4_ON,      // Tuner
       CMD_RLY4_OFF,
-      CMD_TUNE_DN,
+      CMD_TUNE_DN,      //Tune Button
       CMD_TUNE_UP,
-
-      CMD_ANT_0,    // ***** Remove in final version ******
-
-      CMD_ANT_1,    // No antenna selected (Dummy Load)
-      CMD_ANT_2,    // Wire
-      CMD_ANT_3,    // Mag Loop
-      CMD_ANT_4,    // LoG
-      CMD_READ_A0,    // Shack voltage
+      CMD_ANT_1,        // No antenna selected (Dummy Load)
+      CMD_ANT_2,        // Wire
+      CMD_ANT_3,        // Mag Loop
+      CMD_ANT_4,        // LoG
+      CMD_READ_A0,      // Shack voltage
       CMD_READ_A1,
       CMD_READ_A2,
-      CMD_READ_D2,    // Digital input via opto-coupler
+      CMD_READ_D2,      // Digital input via opto-coupler
       CMD_READ_D3,
       CMD_SET_LED_HI,
       CMD_SET_LED_LO,
       CMD_STATUS,
-      CMD_ID // Always keep this last
+      CMD_ID            // Always keep this last
     };
 
     enum { // Receive commands from remoteArduino (I2C slave) via ESP01.
