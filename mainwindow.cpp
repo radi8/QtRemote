@@ -406,14 +406,11 @@ void MainWindow::on_pushButton_Pwr_clicked()
         sendData();
         getData();
     } else {
-        ui->frame->meter_dbm = 0; // Zero the meter
-        ui->frame->update();
-        QThread::msleep(50); // Remote end with Arduino is slow so hardware delay here
         if (ui->pBtn_Relay1->isChecked()) {
             mySendString = (QByteArray::number(CMD_RLY1_OFF, 10) + "\r\n");
             sendData();
             ui->pBtn_Relay1->setChecked(false);
-            QThread::msleep(50);
+            QThread::msleep(50); // Remote end with Arduino is slow so hardware delay here
         }
         if (ui->pBtn_Relay2->isChecked()) {
             mySendString = (QByteArray::number(CMD_RLY2_OFF, 10) + "\r\n");
@@ -437,6 +434,8 @@ void MainWindow::on_pushButton_Pwr_clicked()
         ui->pushButton_Pwr->setStyleSheet("background-color: rgb(0, 170, 0)"); //Green
         mySendString = (QByteArray::number(CMD_PWR_OFF, 10) + "\r\n");
         sendData();
+        ui->frame->meter_dbm = 0; // Zero the meter
+        ui->frame->update();
     }
     qDebug() << Q_FUNC_INFO << "mySendString from pwr button = " << mySendString;
 }
