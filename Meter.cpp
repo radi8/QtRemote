@@ -63,7 +63,7 @@ QImage Meter::getImage(double dbm) {
     painter.drawLine(dxmin, dymin, dxmax, dymax);
 
     painter.setPen(Qt::black);
-    strDbm.sprintf("%2.2f V",dbm);
+    strDbm.asprintf("%2.2f V",dbm);
     QRectF r1(image->width()-80, image->height()-15, 75, 20);
     painter.drawText(r1,Qt::AlignRight,strDbm);
 

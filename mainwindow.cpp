@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "mysettings.h"
-#include "ui_mysettings.h"
 #include <qthread.h>
 #include <QCloseEvent>
 #include <QtWidgets>
@@ -102,22 +101,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
     writeSettings();
     ui->pushButton_Pwr->setChecked(false);
     on_pushButton_Pwr_clicked();
+    event->accept();
 }
 
 void MainWindow::readSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings("ZL2TE", "QtRemote");
 
-//    settings->beginGroup("Geometry");
     settings.beginGroup("Geometry");
-    const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
-    if (geometry.isEmpty()) {
-        const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
-        move((availableGeometry.width() - width()) / 2,
-             (availableGeometry.height() - height()) / 2);
-    } else {
+    const auto geometry = settings.value("geometry", QByteArray()).toByteArray();
+    if (geometry.isEmpty())
+        setGeometry(200, 200, 400, 400);
+    else
         restoreGeometry(geometry);
-    }
     settings.endGroup();
 
     settings.beginGroup("tcpSettings");
@@ -145,7 +141,7 @@ void MainWindow::readSettings()
 
 void MainWindow::writeSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings("ZL2TE", "QtRemote");
 
     settings.beginGroup("Geometry");
     settings.setValue("geometry", saveGeometry());
@@ -217,10 +213,9 @@ void MainWindow::processReceived(QByteArray Buffer)
 // extracted and converted to long integers or a string if cmdVal is a message.
 {
     long cmd;
-    long cmdValue;
+    long cmdValue = 0;
     char * pEnd;
     double cmdVal; // holds converted cmdValue as a float
-    bool ok;
 
 //    qDebug() << Q_FUNC_INFO << "Buffer = " << Buffer;
 //    Buffer.resize(Buffer.indexOf('\r'));

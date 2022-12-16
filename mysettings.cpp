@@ -1,7 +1,6 @@
 #include "mysettings.h"
+#include "qsettings.h"
 #include "ui_mysettings.h"
-#include "ui_mainwindow.h"
-#include "mainwindow.h"
 
 mySettings::mySettings(QWidget *parent) :
     QDialog(parent),
@@ -44,7 +43,7 @@ void mySettings::on_pBtn_02_clicked()
 
 void mySettings::readSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings("ZL2TE", "QtRemote");
 
     settings.beginGroup("relaySettings");
     if(settings.contains("IP_address"))ui->lineEdit_sIP->setText(settings.value("IP_address").toString());
@@ -67,7 +66,7 @@ void mySettings::readSettings()
 
 void mySettings::writeSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings("ZL2TE", "QtRemote");
 
     settings.beginGroup("tcpSettings");
     settings.setValue("IP_address",ui->lineEdit_sIP->text());

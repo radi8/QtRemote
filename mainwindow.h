@@ -67,7 +67,7 @@ public slots:
     void setPbtnText(QString, int);
 
 protected:
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void connected();
